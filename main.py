@@ -3,7 +3,7 @@ import uuid
 from werkzeug.utils import secure_filename
 import os
 
-UPLOAD_FOLDER = 'reel_genrator/user_uploads'
+UPLOAD_FOLDER = 'user_uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
@@ -21,6 +21,7 @@ def create():
         print(request.files.keys())
         rec_id=(request.form.get("uuid"))
         desc=(request.form.get("text"))
+        input_file=[]
         for key,value in request.files.items():
             print(key,value)
             #upload file
@@ -31,13 +32,19 @@ def create():
                     os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], rec_id))
                 
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], rec_id, filename))
+                input_file.append(file.filename)
             #caputer the description and save it to file
             with open(os.path.join(app.config['UPLOAD_FOLDER'], rec_id, "desc.txt"),"w")as f:
               f.write(desc)
+        for fl in input_file:
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], rec_id, "input.txt"),"a")as f:
+                f.write(f"file '{fl}'\nduration 1\n")
     return render_template("create.html",myid=myid)
 
 @app.route("/gallery")
 def gallery():
-    return render_template("gallery.html")
+    reels=os.listdir("static/reels")
+    print(reels)
+    return render_template("gallery.html",reels =reels)
 
 app.run(debug=True)
